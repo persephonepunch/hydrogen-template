@@ -1,4 +1,3 @@
-// app/components/ProductSlider.tsx
 import {Swiper, SwiperSlide} from 'swiper/react';
 import type {Image} from '@shopify/hydrogen/storefront-api-types';
 
@@ -8,7 +7,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 
 import {Navigation, Thumbs} from 'swiper/modules';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 interface ProductSliderProps {
   images: Image[];
@@ -16,13 +15,36 @@ interface ProductSliderProps {
 
 export function ProductSlider({images}: ProductSliderProps) {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    // Render a placeholder on the server
+    return (
+      <div className="product-slider">
+        <div className="mySwiper2">
+          <img src={images[0]?.url} alt={images[0]?.altText || 'Product Image'} />
+        </div>
+        <div className="mySwiper">
+          {images.slice(0, 4).map((image) => (
+            <div key={image.id}>
+              <img src={image.url} alt={image.altText || 'Product Image'} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="product-slider">
       <Swiper
         spaceBetween={10}
         navigation={true}
-        thumbs={{swiper: thumbsSwiper}}
+        thumbs={{swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null}}
         modules={[Navigation, Thumbs]}
         className="mySwiper2"
       >
